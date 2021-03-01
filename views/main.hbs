@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://cdn.socket.io/3.1.1/socket.io.min.js"
+        integrity="sha384-gDaozqUvc4HTgo8iZjwth73C6dDDeOJsAgpxBcMpZYztUfjHXpzrpdrHRdVp8ySO"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingreso de Productos y Chat</title>
+</head>
+
+<body>
+    <div class="row">
+        <div class="col-3"></div>
+        <div class="col-6">
+            {{> form}}
+            <br>
+            <br>
+            {{> lista}}
+            <br>
+            <br>
+            {{> chat}}
+
+        </div>
+        <div class="col-3"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+
+    <script>
+        const socket = io();
+        socket.on('coneccion', data => {
+            let usuario = prompt(data)
+            socket.id = usuario
+            socket.emit('bienvenida', `${socket.id} ha logeado.`)
+        })
+
+        document.getElementById("botonSubmit").addEventListener("click", function (event) {
+            let title = document.querySelector("form[name='myform'] input[name='title']");
+            let price = document.querySelector("form[name='myform'] input[name='price']");
+            let thumbnail = document.querySelector("form[name='myform'] input[name='thumbnail']");
+            //event.preventDefault()
+            socket.emit("newProd", {
+                "title": title.value,
+                "price": price.value,
+                "thumbnail": thumbnail.value,
+                "nombre": socket.id
+            });
+            title.value = ''
+            price.value = ''
+            thumbnail.value = ''
+        });
+
+        document.getElementById("submitMsg").addEventListener("click", function (event) {
+            let email = document.querySelector("input[name='email']");
+            let mensaje = document.querySelector("input[name='mensaje']");
+
+            socket.emit("newMsg", {
+                "email": email.value,
+                "fecha": "00:00:00",
+                "mensaje": mensaje.value,
+                "id": 0
+            });
+            email.value = ''
+            mensaje.value = ''
+        });
+
+        socket.on("recargProd", function (productos) {
+            let prodLista = document.getElementById('prodList')
+            prodLista.innerHTML = ''
+            productos.forEach(elem => {
+                let cadaProd = `<div class="row align-items-center" style="background-color:#aaa">
+                                    <div class="col w-25 p-3">
+                                        <h4>${elem.title}</h4>
+                                    </div>
+                                    <div class="col w-25 p-3">
+                                        <h4>${elem.price}</h4>
+                                    </div>
+                                    <div class="col w-50 p-3"><img src=${elem.thumbnail} style="max-width:50px"></div>
+                                </div>`
+
+                prodLista.innerHTML += cadaProd
+            })
+            return
+        })
+
+        socket.on("recargMsg", function (mensajes) {
+            let msgLista = document.getElementById('msgList')
+            msgLista.innerHTML = ''
+            mensajes.forEach(elem => {
+                let cadaMsg = `<div class="row align-items-center" style="background-color:#aaa">
+                                            <div class="col w-25 p-3" align="center">
+                                                <b style="color:blue">${elem.email}</b>
+                                            </div>
+                                            <div class="col w-25 p-3" align="center">
+                                                <p style="color:brown">[${elem.fecha}]</p>
+                                            </div>
+                                            <div class="col w-50 p-3"><i style="color:green">${elem.mensaje}</i></div>
+                                        </div>`
+                msgLista.innerHTML += cadaMsg
+            })
+            return
+        })
+    </script>
+</body>
+
+</html>

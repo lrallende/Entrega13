@@ -1,0 +1,21 @@
+{{#if listExists}}
+<ul style="margin: 0px; padding: 0px" id="prodList">
+    {{#each productos}}
+    <div class="row align-items-center" style="background-color:#aaa">
+        <div class="col w-25 p-3">
+            <h4>{{this.title}}</h4>
+        </div>
+        <div class="col w-25 p-3">
+            <h4>{{this.price}}</h4>
+        </div>
+        <div class="col w-50 p-3"><img src={{this.thumbnail}} style="max-width:50px"></div>
+    </div>
+    {{/each}}
+</ul>
+{{else}}
+<ul style="margin: 0px; padding: 0px" id="prodList">
+    <div class="row align-items-center" style="background-color:#aaa">
+        <h1>No hay productos</h1>
+    </div>
+</ul>
+{{/if}}
